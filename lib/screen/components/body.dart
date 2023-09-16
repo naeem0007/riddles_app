@@ -15,6 +15,8 @@ class Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     QuestionController questionController = Get.put(QuestionController());
+    final pageController = questionController
+        .getPageControllerForLevel(questionController.currentLevel.id);
 
     return SafeArea(
       child: Padding(
@@ -45,8 +47,7 @@ class Body extends StatelessWidget {
                 child: PageView.builder(
               physics: const NeverScrollableScrollPhysics(),
               onPageChanged: questionController.updateTheQnNum,
-              controller: questionController.getPageControllerForLevel(
-                  questionController.currentLevel.id),
+              controller: pageController,
               itemCount: questionController.levels.length,
               itemBuilder: (context, index) => QuestionCard(
                   // question: questionController.question

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:riddles_app/models/levels/levels.dart';
 import 'package:riddles_app/models/questions.dart';
+import 'package:riddles_app/screen/level_screen/level_screen.dart';
 import 'package:riddles_app/screen/score_screen/score_screen.dart';
 
 class QuestionController extends GetxController
@@ -85,13 +86,13 @@ class QuestionController extends GetxController
   late int _numberOfCorrectAns = 0;
   int get numberOfCorrectAns => _numberOfCorrectAns;
 
-  late Level _currentLevel;
+  Level? _currentLevel;
   Level get currentLevel =>
-      _currentLevel; // Add a field to store the current level
+      _currentLevel!; // Add a field to store the current level
 
-  late List<Question>
+  List<Question>?
       _currentLevelRiddles; // Add a field to store the riddles for the current level
-  List<Question> get currentLevelRiddles => _currentLevelRiddles;
+  List<Question> get currentLevelRiddles => _currentLevelRiddles!;
 
   void setCurrentLevel(Level level) {
     _currentLevel = level;
@@ -151,12 +152,12 @@ class QuestionController extends GetxController
   }
 
   void nextQuestion() {
-    if (_currentLevelRiddles.isNotEmpty &&
-        _questionNumber.value < _currentLevel.riddles.length) {
+    if (_currentLevelRiddles!.isNotEmpty &&
+        _questionNumber.value < _currentLevel!.riddles.length) {
       _questionNumber.value++;
       _isAnswered = false;
       // final pageController = getPageController();
-      final pageController = getPageControllerForLevel(_currentLevel.id);
+      final pageController = getPageControllerForLevel(_currentLevel!.id);
 
       pageController.nextPage(
         duration: const Duration(milliseconds: 250),
@@ -166,8 +167,36 @@ class QuestionController extends GetxController
       _animationController.reset();
       _animationController.forward().whenComplete(nextQuestion);
     } else {
-      // You can show a message or navigate to the next level
-      Get.to(() => const ScoreScreen());
+      // int totalQuestions = currentLevel.riddles.length;
+      // int correctAnswers = numberOfCorrectAns;
+
+      // // Display the score in a BottomSheet
+      // Get.bottomSheet(
+      //   BottomSheet(
+      //     onClosing: () {},
+      //     builder: (context) => Container(
+      //       height: 200,
+      //       color: Colors.white,
+      //       child: Center(
+      //         child: Column(
+      //           children: [
+      //             Text(
+      //               '${correctAnswers * 10} / ${totalQuestions * 10}',
+      //               style: const TextStyle(fontSize: 20),
+      //             ),
+      //             ElevatedButton(
+      //                 onPressed: () {
+      //                   Get.back();
+      //                 },
+      //                 child: const Text('Close'))
+      //           ],
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // );
+
+      Get.back();
 
       // Example: Navigate back to levels screen
     }
