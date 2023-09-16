@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:riddles_app/constant/constant.dart';
 import 'package:riddles_app/models/levels/levels.dart';
 import 'package:riddles_app/models/questions.dart';
 import 'package:riddles_app/screen/level_screen/level_screen.dart';
@@ -13,62 +14,20 @@ class QuestionController extends GetxController
   late Animation _animation;
   Animation get animation => _animation;
 
-  // late PageController _pageController;
-  // PageController get pageContoller => _pageController;
-
-  // Declare a list of PageControllers for each level
   List<PageController> _pageControllers = [];
 
-  // final List<Question> _question = riddlesList
-  //     .map((question) => Question(
-  //         id: question['id'],
-  //         question: question['question'],
-  //         answer: question['answer_index'], // Assign the correct answer index
-  //         options: List<String>.from(
-  //             question['options']))) // Convert options to a List<String>
-  //     .toList();
-
-  // List<Question> get question => _question;
-
-  final List<Level> _levels = [
-    Level(
-      id: 1,
-      riddles: [
-        Question(
-          id: 1,
-          question: "Riddle 1 for Level 1",
-          answer: 0,
-          options: ["Option A", "Option B", "Option C", "Option D"],
-        ),
-        Question(
-          id: 2,
-          question: "Riddle 2 for Level 1",
-          answer: 1,
-          options: ["Option A", "Option B", "Option C", "Option D"],
-        ),
-        // Add more riddles for Level 1
-      ],
-    ),
-    Level(
-      id: 2,
-      riddles: [
-        Question(
-          id: 1,
-          question: "Riddle 1 for Level 2",
-          answer: 2,
-          options: ["Option A", "Option B", "Option C", "Option D"],
-        ),
-        Question(
-          id: 2,
-          question: "Riddle 2 for Level 2",
-          answer: 3,
-          options: ["Option A", "Option B", "Option C", "Option D"],
-        ),
-        // Add more riddles for Level 2
-      ],
-    ),
-    // Add levels and their riddles up to Level 10
-  ];
+  final List<Level> _levels = levelsData
+      .map((level) => Level(
+            id: level['id'],
+            riddles:
+                List<Question>.from(level['riddles'].map((riddle) => Question(
+                      id: riddle['id'],
+                      question: riddle['question'],
+                      answer: riddle['answer_index'],
+                      options: List<String>.from(riddle['options']),
+                    ))),
+          ))
+      .toList();
   List<Level> get levels => _levels;
 
   late bool _isAnswered = false;
@@ -108,13 +67,18 @@ class QuestionController extends GetxController
       ..addListener(() {
         update();
       });
-    _animationController.forward().whenComplete(nextQuestion);
-    // _pageController = PageController();
-    // Initialize the PageControllers for each level
+    // _animationController.forward().whenComplete(nextQuestion);
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        nextQuestion();
+      }
+    });
+    _animationController.forward();
+
     _pageControllers = List.generate(
       _levels.length,
       (index) => PageController(
-        initialPage: index,
+        initialPage: 0,
       ),
     );
 
@@ -137,23 +101,27 @@ class QuestionController extends GetxController
 
   void checkAnswer(Question question, int selectedIndex) {
     //once user press any option then it will run
-    _isAnswered = true;
-    _correctAnswer = question.answer;
-    _selectedAnswer = selectedIndex;
+    if (!_isAnswered) {
+      // Check if the selected answer index is valid
+      if (selectedIndex >= 0 && selectedIndex < question.options.length) {
+        _isAnswered = true;
+        _correctAnswer = question.answer;
+        _selectedAnswer = selectedIndex;
 
-    if (_correctAnswer == _selectedAnswer) _numberOfCorrectAns++;
+        if (_correctAnswer == _selectedAnswer) _numberOfCorrectAns++;
 
-    //stop counter
-    _animationController.stop();
-    update();
-    Future.delayed(const Duration(seconds: 1), () {
-      nextQuestion();
-    });
+        // Stop the counter
+        _animationController.stop();
+        update();
+        Future.delayed(const Duration(seconds: 1), () {
+          nextQuestion();
+        });
+      }
+    }
   }
 
   void nextQuestion() {
-    if (_currentLevelRiddles!.isNotEmpty &&
-        _questionNumber.value < _currentLevel!.riddles.length) {
+    if (_questionNumber.value != _currentLevel!.riddles.length) {
       _questionNumber.value++;
       _isAnswered = false;
       // final pageController = getPageController();
@@ -165,44 +133,61 @@ class QuestionController extends GetxController
       );
 
       _animationController.reset();
-      _animationController.forward().whenComplete(nextQuestion);
+      _animationController.forward();
     } else {
-      // int totalQuestions = currentLevel.riddles.length;
-      // int correctAnswers = numberOfCorrectAns;
+      int totalQuestions = currentLevel.riddles.length;
+      int correctAnswers = numberOfCorrectAns;
 
-      // // Display the score in a BottomSheet
-      // Get.bottomSheet(
-      //   BottomSheet(
-      //     onClosing: () {},
-      //     builder: (context) => Container(
-      //       height: 200,
-      //       color: Colors.white,
-      //       child: Center(
-      //         child: Column(
-      //           children: [
-      //             Text(
-      //               '${correctAnswers * 10} / ${totalQuestions * 10}',
-      //               style: const TextStyle(fontSize: 20),
-      //             ),
-      //             ElevatedButton(
-      //                 onPressed: () {
-      //                   Get.back();
-      //                 },
-      //                 child: const Text('Close'))
-      //           ],
-      //         ),
-      //       ),
-      //     ),
-      //   ),
-      // );
+      Get.bottomSheet(
+        BottomSheet(
+          elevation: 5,
+          onClosing: () {
+            reset();
+            Get.back();
+          },
+          builder: (context) => Container(
+            height: 200,
+            decoration: const BoxDecoration(
+                gradient: primaryGradient,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20))),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Your Score is ${correctAnswers * 10} / ${totalQuestions * 10}!',
+                    style: normalText(size: 25),
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        reset();
+                        Get.back();
+                        Get.back();
+                      },
+                      child: Text(
+                        'Close',
+                        style: normalText(size: 18, color: Colors.black),
+                      ))
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 
-      Get.back();
+      // Display the score in a BottomSheet
 
-      // Example: Navigate back to levels screen
+      //   // Example: Navigate back to levels screen
+      // }
+      // else {
+      //   Get.to(() => const ScoreScreen());
+      // }
     }
-    // else {
-    //   Get.to(() => const ScoreScreen());
-    // }
   }
 
   void updateTheQnNum(int index) {

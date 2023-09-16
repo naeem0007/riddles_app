@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:riddles_app/constant/constant.dart';
 import 'package:riddles_app/controller/question_controller.dart';
-import 'package:riddles_app/models/levels/levels.dart';
 import 'package:riddles_app/models/questions.dart';
 import 'package:riddles_app/screen/components/options.dart';
 

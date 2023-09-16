@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:riddles_app/constant/constant.dart';
 import 'package:riddles_app/controller/question_controller.dart';
-import 'package:riddles_app/models/levels/levels.dart';
-
 import 'package:riddles_app/screen/components/progressbar.dart';
 import 'package:riddles_app/screen/components/question_card.dart';
 
@@ -45,7 +43,7 @@ class Body extends StatelessWidget {
             ),
             Expanded(
                 child: PageView.builder(
-              physics: const NeverScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               onPageChanged: questionController.updateTheQnNum,
               controller: pageController,
               itemCount: questionController.levels.length,
