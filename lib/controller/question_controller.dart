@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 import 'package:riddles_app/constant/constant.dart';
 import 'package:riddles_app/models/levels/levels.dart';
 import 'package:riddles_app/models/questions.dart';
-import 'package:riddles_app/screen/level_screen/level_screen.dart';
-import 'package:riddles_app/screen/score_screen/score_screen.dart';
+import 'package:riddles_app/screen/score_screen/score_sheet.dart';
 
 class QuestionController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -135,50 +134,7 @@ class QuestionController extends GetxController
       _animationController.reset();
       _animationController.forward();
     } else {
-      int totalQuestions = currentLevel.riddles.length;
-      int correctAnswers = numberOfCorrectAns;
-
-      Get.bottomSheet(
-        BottomSheet(
-          elevation: 5,
-          onClosing: () {
-            reset();
-            Get.back();
-          },
-          builder: (context) => Container(
-            height: 200,
-            decoration: const BoxDecoration(
-                gradient: primaryGradient,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20))),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Your Score is ${correctAnswers * 10} / ${totalQuestions * 10}!',
-                    style: normalText(size: 25),
-                  ),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        reset();
-                        Get.back();
-                        Get.back();
-                      },
-                      child: Text(
-                        'Close',
-                        style: normalText(size: 18, color: Colors.black),
-                      ))
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+      scoreSheet();
 
       // Display the score in a BottomSheet
 
